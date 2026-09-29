@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>ClaudeUsageWidget</AssemblyName>
+    <RootNamespace>ClaudeUsageWidget</RootNamespace>
+    <Version>0.4.1</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../ClaudeUsageWidget.Core/ClaudeUsageWidget.Core.csproj" />
+  </ItemGroup>
+</Project>
