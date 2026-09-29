@@ -212,7 +212,6 @@ public partial class MainWindow : Window
             var modeChanged = _settings.ManualMode != settings.Result.ManualMode;
             settings.Result.AutoConnect = _settings.AutoConnect;
             settings.Result.ConnectionDisabled = _settings.ConnectionDisabled;
-            settings.Result.BrowserKind = _settings.BrowserKind;
             _settings = settings.Result;
             if (modeChanged)
             {

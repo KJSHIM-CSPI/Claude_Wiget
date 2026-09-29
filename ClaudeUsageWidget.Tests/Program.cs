@@ -36,45 +36,18 @@ Check(settings.RefreshSeconds == 10 && settings.Opacity == 0.94 && settings.Manu
 var temp = Path.Combine(Path.GetTempPath(), "claude-widget-test-" + Guid.NewGuid().ToString("N"), "settings.json");
 try
 {
-    SettingsStore.Save(temp, new WidgetSettings { RefreshSeconds = 45, ManualMode = true, ManualReset = now, AutoConnect = true, BrowserKind = "Edge" });
+    SettingsStore.Save(temp, new WidgetSettings { RefreshSeconds = 45, ManualMode = true, ManualReset = now, AutoConnect = true });
     var saved = SettingsStore.Load(temp);
     Check(saved.RefreshSeconds == 45 && saved.ManualMode && saved.ManualReset == now && saved.AutoConnect, "settings and connection preference round trip");
-    Check(saved.BrowserKind == "Edge", "previously selected browser survives restart");
     saved.AutoConnect = false;
     SettingsStore.Save(temp, saved);
     Check(!SettingsStore.Load(temp).AutoConnect, "signed out preference survives restart");
+    File.WriteAllText(temp, """{"BrowserKind":"Edge","RefreshSeconds":45,"ConnectionDisabled":true,"AutoConnect":false}""");
+    var migrated = SettingsStore.Load(temp);
+    Check(migrated.RefreshSeconds == 45 && migrated.ConnectionDisabled && !migrated.AutoConnect,
+        "legacy browser preference is ignored without losing current settings");
     File.WriteAllText(temp, "{broken");
     Check(SettingsStore.Load(temp).RefreshSeconds == 30, "corrupt settings recover defaults");
 }
 finally { if (File.Exists(temp)) File.Delete(temp); Directory.Delete(Path.GetDirectoryName(temp)!); }
 Console.WriteLine($"{passed} checks passed.");
-
-var endpoint = BrowserEndpoint.Parse("9222\n/devtools/browser/test-id\n");
-Check(endpoint.HttpBase.AbsoluteUri == "http://127.0.0.1:9222/", "browser connection is bound to literal loopback");
-Check(endpoint.ValidateSocket("ws://127.0.0.1:9222/devtools/page/page-id").Port == 9222, "page socket matches dedicated browser port");
-foreach (var bad in new[] { "ws://example.com:9222/devtools/page/1", "ws://127.0.0.1:9999/devtools/page/1", "ws://127.0.0.1:9222/devtools/page/1?secret=x", "ws://127.0.0.1:9222/devtools/browser/other" })
-{
-    var rejected = false;
-    try { endpoint.ValidateSocket(bad); } catch (FormatException) { rejected = true; }
-    Check(rejected, "reject unrelated browser endpoint");
-}
-foreach (var bad in new[] { "0\n/devtools/browser/id", "9222\n//example.com", "9222\n/devtools/browser/../page/id", "65536\n/devtools/browser/id" })
-{
-    var rejected = false;
-    try { BrowserEndpoint.Parse(bad); } catch (FormatException) { rejected = true; }
-    Check(rejected, "reject malformed endpoint file");
-}
-Check(BrowserSession.IsClaudeOrigin("https://claude.ai/settings/usage"), "accept Claude page origin");
-Check(!BrowserSession.IsClaudeOrigin("https://claude.ai.evil.test/settings/usage"), "reject lookalike origin");
-Check(!BrowserSession.IsClaudeOrigin("https://claude.ai:8443/"), "reject nonstandard Claude port");
-Check(ConnectionFailure.Describe("unexpected_shape", "organizations", 200).Contains("로그인 실패로 확인된 것은 아닙니다"), "do not blame login for schema mismatch");
-Console.WriteLine($"Total: {passed} checks passed.");
-await NativeBridgeChecks.Run(args.FirstOrDefault(a => a.StartsWith("--native-host="))?.Split('=', 2)[1]);
-
-if (args.Contains("--browser-integration"))
-{
-    var profileRoot = Path.Combine(Environment.CurrentDirectory, "artifacts", "browser-probe-" + Guid.NewGuid().ToString("N"));
-    using var browser = new BrowserSession(profileRoot, offlineTest: true);
-    await browser.ProbeOfflineAsync();
-    Console.WriteLine($"PASS: real {browser.BrowserName} launched; endpoint identity verified; awaited JavaScript returned 42; isolated logout commands succeeded; test browser closed.");
-}

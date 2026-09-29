@@ -4,7 +4,4 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="../ClaudeUsageWidget/Browser/usage.js" Link="Browser/usage.js" />
-  </ItemGroup>
 </Project>

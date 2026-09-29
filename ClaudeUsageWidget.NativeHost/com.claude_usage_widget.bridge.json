@@ -1,7 +1,0 @@
-{
-  "name": "com.claude_usage_widget.bridge",
-  "description": "Claude usage widget local bridge",
-  "path": "ClaudeUsageWidget.NativeHost.exe",
-  "type": "stdio",
-  "allowed_origins": ["chrome-extension://lnfieklpgjnhhonoebelmhkmccnifafc/"]
-}

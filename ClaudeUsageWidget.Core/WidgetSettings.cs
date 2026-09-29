@@ -9,7 +9,6 @@ public sealed class WidgetSettings
     public bool AlwaysOnTop { get; set; } = true;
     public bool AutoConnect { get; set; }
     public bool ConnectionDisabled { get; set; }
-    public string? BrowserKind { get; set; }
     public bool ManualMode { get; set; }
     public double ManualFiveHour { get; set; }
     public double ManualFable { get; set; }
@@ -20,7 +19,6 @@ public sealed class WidgetSettings
     public void Normalize()
     {
         RefreshSeconds = Math.Clamp(RefreshSeconds, 10, 86400);
-        if (BrowserKind is not (null or "Chrome" or "Edge")) BrowserKind = null;
         Opacity = double.IsFinite(Opacity) ? Math.Clamp(Opacity, 0.2, 1) : 0.94;
         ManualFiveHour = double.IsFinite(ManualFiveHour) ? Math.Clamp(ManualFiveHour, 0, 100) : 0;
         ManualFable = double.IsFinite(ManualFable) ? Math.Clamp(ManualFable, 0, 100) : 0;
